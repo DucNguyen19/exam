@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
-import {  Button, Container, Row, Col, Input, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Button, Container, Row, Col, Input, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import './App.css';
-
+import { UncontrolledDropdown,
+            DropdownToggle,
+            DropdownMenu,
+            DropdownItem } from 'reactstrap';
 
 
 class App extends Component {
@@ -13,9 +16,11 @@ class App extends Component {
                   status: false,
                   modal: false,
                   authorEdit: [],
+                  cmtEdit: [],
+            
             }
       }
-
+ 
       componentDidMount(){
             this.getData();
       }
@@ -24,53 +29,54 @@ class App extends Component {
             //user =
             let user = {
                   id: '1',
-                  name: 'Le Tuan'
+                  name: 'Hoang Long'
             }
 
             let data = 
                   [
-                    {
-                        author: 'Le Tuan',
-                        content: 'We have made th inredhemselves. ',
-                        text : '',
-                        editContent : '',
-                        updated: false,
-                        comments: [
-                              {
-                                    user: 'Hoang Long',
-                                    content: 'You can now view training in the browser.',
-                                    like: false,
-                              },
-                              {
-                                    user: 'Ngoc Huyen',
-                                    content: 'Note that the development build is not optimized.',
-                                    like: false,
-                              },
-                            
-
-                            ]
-                          },
-                          {
-                            author: 'Trong Duc',
-                            content: 'We have found some problems.',
-                            text : '',
-                            editContent : '',
-                            updated: false,
-                            comments: [
-                                  {
-                                        user: 'Hoang Long',
-                                        content: 'Local:            http://localhost:3000.',
-                                        like: false,
-                                  },
-                                  {
-                                        user: 'Ngoc Huyen',
-                                        content: 'To create a production build, use npm run build.',
-                                        like: false,
-                                  },
-                                
-    
+                        {
+                              author: 'Le Tuan',
+                              content: 'We have made th inredhemselves. ',
+                              text : '',
+                              editContent : '',
+                              updated: false,
+                              editCommented: false,
+                              comments: [
+                                    {
+                                          user: 'Hoang Long',
+                                          content: 'You can now view training in the browser.',
+                                          like: false,
+                                          deleted: true,
+                                    },
+                                    {
+                                          user: 'Ngoc Huyen',
+                                          content: 'Note that the development build is not optimized.',
+                                          like: false,
+                                    },
                               ]
-                              }
+                              },
+                              {
+                              author: 'Loki',
+                              content: 'We have found some problems.',
+                              text : '',
+                              editContent : '',
+                              updated: false,
+                              editCommented: false,
+                              comments: [
+                                    {
+                                          user: 'Jonathan',
+                                          content: 'Local:  http://localhost:3000.',
+                                          like: false,
+                                    },
+                                    {
+                                          user: 'John',
+                                          content: 'To create a production build, use npm run build.',
+                                          like: false,
+                                    },
+                                    
+      
+                                    ]
+                                    }
                       ]
                   
             this.setState({
@@ -118,36 +124,79 @@ class App extends Component {
                   modal: !this.state.modal
             })
       }
-      clickToggle = (ev, i) => {
+      onClickEditPost = (ev, i) => {
             let {data, authorEdit} = this.state;
-            this.toggle();
-            // console.log(data[i].author, 'author....');
             authorEdit = data[i];
-            
-            // console.log(authorEdit.editContent, 'authorEdit....');
+            authorEdit.editContent = data[i].content;
+            this.toggle();
             this.setState({
                   data,
                   authorEdit,
             })
       }
-      onChangeEdit = (ev, i) => {
+      onChangeEditPost = (ev, i) => {
             let authorEdit = this.state.authorEdit;
             authorEdit.editContent = ev.target.value;
-            // console.log(authorEdit.editContent, 'authorEdit');
             this.setState({
                   authorEdit
             });
       }
-      updateEdit = (e, i) => {
+      clickUpdatePost = (e, i) => {
             this.toggle();
-            let {authorEdit} = this.state;
+            let {data,authorEdit} = this.state;
             authorEdit.updated = 'true';
-            // console.log(authorEdit, 'Authr');
+            authorEdit.content = authorEdit.editContent; 
             this.setState({
+                  data,
                   authorEdit,
             })
       }
+      clickEditCmt = (e, i, r) => {
+            let {data, cmtEdit} = this.state;
+            data[i].editCommented = true;
+            cmtEdit = data[i].comments[r];
+            // console.log(cmtEdit, 'data edit');
+            data[i].text = cmtEdit.content;
+            this.setState({
+                  data,
+                  cmtEdit
+            })
+      }
+      clickUpdateCmt = (e, i) => {
+            let { data, cmtEdit } = this.state;
+            data[i].editCommented = !data[i].editCommented;
+            cmtEdit.content = data[i].text;
+            // console.log(cmtEdit);
+            data[i].text = '';
+            this.setState({
+                  data,
+                  cmtEdit
+            })
+      }
+      cancelUpdateCmt = (e, i) => {
+            let { data, cmtEdit } = this.state;
+            data[i].editCommented = false;
+            data[i].text = '';
+            this.setState({
+                  data,
+                  cmtEdit
+            })
+      }
+      deleteComment = (e, i, r) => {
+            let data = this.state.data;
+            console.log(data[i].comments[r]);
+            // data.filter((e, i, r) => {
+                  // return(
 
+                  // )
+            // })
+
+
+
+            this.setState({
+                  data
+            })
+      }
       render() {
             let { data, user, modal, authorEdit } = this.state;
             let arr = data ? data: [];
@@ -157,16 +206,39 @@ class App extends Component {
                   
                   let itemComments = arrComments.map((d, r) => {
                         return ( 
-                              <div className="comment">
+                              <div className="comment" >
                                           <div className="user"> 
                                                 {d.user}
                                           </div>
                                           <div className="content">          
                                                 {d.content}
                                           </div>
-                                          <div className={d.like ? 'like' : 'liked'} onClick={ev => this.likeComment(ev, i ,r)}> <span class="material-icons">thumb_up</span>
+                                          <div className={d.like ? 'like' : 'liked'} onClick={ev => this.likeComment(ev, i ,r)}> <span className="material-icons">thumb_up</span>
                                           </div>
-                                          <div className="edit"><span style = {{'display': d.user === user.name ? 'block' : 'none', 'float' : 'right'}} class="material-icons">edit_note</span>
+                                          <div > 
+                                                <UncontrolledDropdown >
+                                                <DropdownToggle nav >
+                                                <span className="material-icons">
+                                                      more_vert
+                                                </span>
+                                                </DropdownToggle>
+                                                <DropdownMenu>
+                                                      <DropdownItem>Re-Comment</DropdownItem>
+                                                      <DropdownItem>Hide Comment</DropdownItem>
+                                                </DropdownMenu>
+                                                <DropdownMenu style = {{'display': d.user === user.name ? '' : 'none'}}>
+                                                <DropdownItem>Re-Comment</DropdownItem>
+                                                <DropdownItem onClick = {e => this.clickEditCmt(e, i, r)} >
+                                                      Edit Comment
+                                                </DropdownItem>
+                                                <DropdownItem onClick = {e => this.cancelUpdateCmt(e, i)}>
+                                                      Cancel Edit Comment
+                                                </DropdownItem>
+                                                <DropdownItem onClick = {e => this.deleteComment(e, i, r)}>
+                                                      Delete Comment
+                                                </DropdownItem>
+                                                </DropdownMenu>
+                                                </UncontrolledDropdown>
                                           </div>
                                     </div>
                         )
@@ -183,14 +255,14 @@ class App extends Component {
                                     <p> {c.updated ? c.editContent : c.content} </p>
                                     
                                     <div>
-                                          <Button style = {{'display': c.author === user.name ? 'block' : 'none', 'float' : 'right'}} onClick={ev => this.clickToggle(ev, i)}>Edit Post</Button>
-                                          <Modal isOpen={modal} toggle={this.clickToggle}>
+                                          <Button style = {{'display': c.author === user.name ? 'block' : 'none', 'float' : 'right'}} onClick={ev => this.onClickEditPost(ev, i)}>Edit Post</Button>
+                                          <Modal isOpen={modal}>
                                           <ModalHeader>Edit Post Of {authorEdit.author} </ModalHeader>
                                           <ModalBody>
-                                                <Input value = {authorEdit.editContent} type = "text" placeholder = "Write the new content......." onChange = {ev => this.onChangeEdit(ev, i)} />
+                                                <Input value = {authorEdit.editContent} type = "text" placeholder = "Write the new content......." onChange = {ev => this.onChangeEditPost(ev, i)} />
                                           </ModalBody>
                                           <ModalFooter>
-                                          <Button color="primary" onClick={e => this.updateEdit(e, i)}>Update</Button>{' '}
+                                          <Button color="primary" onClick={e => this.clickUpdatePost(e, i)}>Update</Button>{' '}
                                           <Button color="secondary" onClick={this.toggle}>Cancel</Button>
                                           </ModalFooter>
                                           </Modal>
@@ -203,9 +275,15 @@ class App extends Component {
                               </Col>
                         </Row>
                         <Row>
-                              <Col xs={{ 'size' : '6' , 'offset' : '2' }} style={{ 'display' : 'flex', 'paddingTop' : '20px' }}>
-                                    <Input value = {c.text} onChange={ev => this.onChangeText(ev, i)}  name="text" className="text" type="text" placeholder="Write something......." />
-                                    <Button onClick={e => this.onSubmit(e, i)}>Comment</Button>
+                              <Col xs={{ 'size' : '6' , 'offset' : '2' }} style={{ 'display' :
+                              'flex', 'paddingTop' : '20px' }}>
+                                    <Input value = {c.text} onChange={ev => this.onChangeText(ev, i)} 
+                                    name="text" className="text" type="text" placeholder="Write something......." />
+                                    {data[i].editCommented ? (
+                                          <Button onClick = {e => this.clickUpdateCmt(e, i)} >Update</Button> 
+                                    ) : (
+                                          <Button onClick = {e => this.onSubmit(e, i)}>Comment</Button>
+                                    )}
                               </Col>
                         </Row>
                   
