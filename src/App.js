@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component , Fragment} from 'react';
 import { Button, Container, Row, Col, Input, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import './App.css';
 import { UncontrolledDropdown,
@@ -15,8 +15,8 @@ class App extends Component {
                   user: {},
                   status: false,
                   modal: false,
-                  authorEdit: [],
-                  cmtEdit: [],
+                  indexComment: -1,
+                  indexPost: -1
             
             }
       }
@@ -29,7 +29,7 @@ class App extends Component {
             //user =
             let user = {
                   id: '1',
-                  name: 'Hoang Long'
+                  name: 'Le Tuan'      
             }
 
             let data = 
@@ -41,17 +41,33 @@ class App extends Component {
                               editContent : '',
                               updated: false,
                               editCommented: false,
+                              // deleted: false,
                               comments: [
                                     {
                                           user: 'Hoang Long',
                                           content: 'You can now view training in the browser.',
                                           like: false,
-                                          deleted: true,
+                                          // deleted: false,
+                                          reComment: [
+                                                {
+                                                      user: 'userName',
+                                                      content: 'QWERT',
+                                                      like: false,
+                                                }
+                                          ]
                                     },
                                     {
                                           user: 'Ngoc Huyen',
                                           content: 'Note that the development build is not optimized.',
                                           like: false,
+                                          // deleted: false,
+                                          reComment: [
+                                                {
+                                                      user: 'userName1',
+                                                      content: 'QWERT1',
+                                                      like: false,
+                                                }
+                                          ]
                                     },
                               ]
                               },
@@ -62,19 +78,34 @@ class App extends Component {
                               editContent : '',
                               updated: false,
                               editCommented: false,
+                              // deleted: false,
                               comments: [
                                     {
                                           user: 'Jonathan',
                                           content: 'Local:  http://localhost:3000.',
                                           like: false,
+                                          // deleted: false,
+                                          reComment: [
+                                                {
+                                                      user: 'userName2',
+                                                      content: 'QWERT2',
+                                                      like: false,
+                                                }
+                                          ]
                                     },
                                     {
                                           user: 'John',
                                           content: 'To create a production build, use npm run build.',
                                           like: false,
+                                          // deleted: false,
+                                          reComment: [
+                                                {
+                                                      user: 'userName3',
+                                                      content: 'QWERT3',
+                                                      like: false,
+                                                }
+                                          ]
                                     },
-                                    
-      
                                     ]
                                     }
                       ]
@@ -125,52 +156,59 @@ class App extends Component {
             })
       }
       onClickEditPost = (ev, i) => {
-            let {data, authorEdit} = this.state;
-            authorEdit = data[i];
-            authorEdit.editContent = data[i].content;
+            let {data, indexPost}= this.state;
+            // authorEdit = data[i]; // [] 
+            // authorEdit.editContent = data[i].content;
+            indexPost = i;
+            data[indexPost].editContent = data[indexPost].content;
+            
             this.toggle();
             this.setState({
                   data,
-                  authorEdit,
+                  indexPost,
             })
+            
       }
       onChangeEditPost = (ev, i) => {
-            let authorEdit = this.state.authorEdit;
-            authorEdit.editContent = ev.target.value;
+            let { data, indexPost} = this.state;
+            data[indexPost].editContent = ev.target.value;
+            // console.log(data[indexPost].editContent, 'edit content');
+            // console.log(data[indexPost].author, 'author');
+            // console.log(indexPost, 'indexPost');
             this.setState({
-                  authorEdit
+                  data
             });
       }
       clickUpdatePost = (e, i) => {
             this.toggle();
-            let {data,authorEdit} = this.state;
-            authorEdit.updated = 'true';
-            authorEdit.content = authorEdit.editContent; 
+            let {data, indexPost} = this.state;
+            data[indexPost].updated = true;
+            data[indexPost].content = data[indexPost].editContent;
             this.setState({
                   data,
-                  authorEdit,
+                  indexPost
             })
       }
       clickEditCmt = (e, i, r) => {
-            let {data, cmtEdit} = this.state;
+            let {data, indexComment} = this.state;
             data[i].editCommented = true;
-            cmtEdit = data[i].comments[r];
+            indexComment = r;
             // console.log(cmtEdit, 'data edit');
-            data[i].text = cmtEdit.content;
+            data[i].text = data[i].comments[indexComment].content;
             this.setState({
                   data,
-                  cmtEdit
+                  indexComment
             })
       }
       clickUpdateCmt = (e, i) => {
-            let { data, cmtEdit } = this.state;
+            let { data, indexComment } = this.state;
             data[i].editCommented = !data[i].editCommented;
-            cmtEdit.content = data[i].text;
+            data[i].comments[indexComment].content = data[i].text;
             // console.log(cmtEdit);
             data[i].text = '';
             this.setState({
                   data,
-                  cmtEdit
+                  indexComment
             })
       }
       cancelUpdateCmt = (e, i) => {
@@ -182,31 +220,43 @@ class App extends Component {
                   cmtEdit
             })
       }
-      deleteComment = (e, i, r) => {
-            let data = this.state.data;
-            console.log(data[i].comments[r]);
-            // data.filter((e, i, r) => {
-                  // return(
+            deleteComment = (e, i, r) => {
+                  let data = this.state.data;
+                  console.log(data[i].comments[r]);
+                  
 
-                  // )
-            // })
-
-
-
-            this.setState({
-                  data
-            })
-      }
+                  this.setState({
+                        data
+                  })
+            }
       render() {
-            let { data, user, modal, authorEdit } = this.state;
+            let { data, user, modal, indexPost } = this.state;
             let arr = data ? data: [];
-            
+            let editC = data[indexPost] ? data[indexPost] : '';
             let item = arr.map((c, i) => {
                   let arrComments = c.comments ? c.comments : [];
                   
                   let itemComments = arrComments.map((d, r) => {
+                        let cmt = d.reComment ? d.reComment : []
+                        let reCmt = cmt.map((x, z) => {
+                              return (
+                                    <div className = "reComment">
+                                          <div className="user"> 
+                                                      {x.user}
+                                          </div>
+                                          <div className="content">          
+                                                {x.content}
+                                          </div>
+                                          <div> 
+                                                <span className="material-icons">thumb_up</span>
+                                          </div>
+                                          
+                                    </div>
+                              )
+                        })
                         return ( 
-                              <div className="comment" >
+                              <div>
+                              <div className="comment">
                                           <div className="user"> 
                                                 {d.user}
                                           </div>
@@ -231,14 +281,16 @@ class App extends Component {
                                                 <DropdownItem onClick = {e => this.clickEditCmt(e, i, r)} >
                                                       Edit Comment
                                                 </DropdownItem>
-                                                <DropdownItem onClick = {e => this.cancelUpdateCmt(e, i)}>
-                                                      Cancel Edit Comment
-                                                </DropdownItem>
-                                                <DropdownItem onClick = {e => this.deleteComment(e, i, r)}>
+                                                <DropdownItem>
                                                       Delete Comment
                                                 </DropdownItem>
                                                 </DropdownMenu>
                                                 </UncontrolledDropdown>
+                                          </div>
+                                          
+                                    </div>
+                                          <div className = "reCmt">
+                                                {reCmt}
                                           </div>
                                     </div>
                         )
@@ -256,16 +308,7 @@ class App extends Component {
                                     
                                     <div>
                                           <Button style = {{'display': c.author === user.name ? 'block' : 'none', 'float' : 'right'}} onClick={ev => this.onClickEditPost(ev, i)}>Edit Post</Button>
-                                          <Modal isOpen={modal}>
-                                          <ModalHeader>Edit Post Of {authorEdit.author} </ModalHeader>
-                                          <ModalBody>
-                                                <Input value = {authorEdit.editContent} type = "text" placeholder = "Write the new content......." onChange = {ev => this.onChangeEditPost(ev, i)} />
-                                          </ModalBody>
-                                          <ModalFooter>
-                                          <Button color="primary" onClick={e => this.clickUpdatePost(e, i)}>Update</Button>{' '}
-                                          <Button color="secondary" onClick={this.toggle}>Cancel</Button>
-                                          </ModalFooter>
-                                          </Modal>
+                                          
                                     </div>
                               </Col>
                         </Row>
@@ -280,9 +323,12 @@ class App extends Component {
                                     <Input value = {c.text} onChange={ev => this.onChangeText(ev, i)} 
                                     name="text" className="text" type="text" placeholder="Write something......." />
                                     {data[i].editCommented ? (
-                                          <Button onClick = {e => this.clickUpdateCmt(e, i)} >Update</Button> 
+                                          <Fragment>
+                                          <Button className = "button" onClick = {e => this.clickUpdateCmt(e, i)} >Update</Button> 
+                                          <Button className = "button" onClick = {e => this.cancelUpdateCmt(e, i)}>Cancel</Button>
+                                          </Fragment>
                                     ) : (
-                                          <Button onClick = {e => this.onSubmit(e, i)}>Comment</Button>
+                                          <Button className = "button" onClick = {e => this.onSubmit(e, i)}>Comment</Button>
                                     )}
                               </Col>
                         </Row>
@@ -296,7 +342,18 @@ class App extends Component {
                         <Container>
                               {item}
                         </Container>
-                        
+                        <div>
+                                          <Modal isOpen={modal}>
+                                          <ModalHeader>Edit Post Of { editC ? data[indexPost].author : ''  }   </ModalHeader>
+                                          <ModalBody>
+                                                <Input style = {{"height" : "200px"}} value = {editC ? data[indexPost].editContent : '' } type="textarea" placeholder = "Write the new content......." onChange = {ev => this.onChangeEditPost(ev)} />
+                                          </ModalBody>
+                                          <ModalFooter>
+                                          <Button color="primary" onClick={e => this.clickUpdatePost(e)}>Update</Button>{' '}
+                                          <Button color="secondary" onClick={this.toggle}>Cancel</Button>
+                                          </ModalFooter>
+                                          </Modal>
+                        </div>
                   </div>
                   
             );
